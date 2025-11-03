@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite" // change to "mysql" or "postgresql" later if you want
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       Int     @id
+  uname    String  @unique
+  password String
+
+  posts     Post[]
+  comments  Comment[]
+  votes     Vote[]
+}
+
+model Post {
+  id          Int       @id
+  title       String
+  link        String
+  description String
+  subgroup    String
+  timestamp   DateTime  @default(now())
+
+  creator    User      @relation(fields: [creatorId], references: [id])
+  creatorId  Int
+
+  comments   Comment[]
+  votes      Vote[]
+}
+
+model Comment {
+  id         Int      @id
+  description String
+  timestamp   DateTime @default(now())
+
+  post      Post   @relation(fields: [postId], references: [id])
+  postId    Int
+
+  creator   User   @relation(fields: [creatorId], references: [id])
+  creatorId Int
+}
+
+model Vote {
+  userId Int
+  postId Int
+  value  Int
+
+  user User @relation(fields: [userId], references: [id])
+  post Post @relation(fields: [postId], references: [id])
+
+  @@id([userId, postId]) // unique per (user, post)
+}
