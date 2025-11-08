@@ -30,8 +30,8 @@ passport.serializeUser(function (user: any, done: any) {
 });
 
 // ⭐ TODO: Passport Types
-passport.deserializeUser(function (id: any, done: any) {
-  const user = getUserById(id);
+passport.deserializeUser(async function (id: any, done: any) {
+  const user = await getUserById(id);
   if (user) {
     done(null, user);
   } else {

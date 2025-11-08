@@ -9,17 +9,81 @@
       href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.classless.min.css"
     />
     <link href="/css/style.css" rel="stylesheet" />
-    <title>Post</title>
+    <title><%= post.title %></title>
   </head>
   <body>
     <main>
       <div class="authOptions">
-        <h1>View Post</h1>
+        <h1><%= post.title %></h1>
         <a role="button" href="/posts">Home</a>
       </div>
-      <div>
-        <p>Implement this page yourself. It is from individualPost.ejs</p>
-      </div>
+
+      <!-- Post Details -->
+      <article>
+        <header>
+          <p>
+            Posted by <strong><%= post.creator.uname %></strong> in
+            <em><%= post.subgroup %></em> •
+            <%= post.timestamp.toLocaleDateString() %>
+          </p>
+        </header>
+
+        <% if (post.link) { %>
+        <p>
+          <a href="<%= post.link %>" target="_blank"><%= post.link %></a>
+        </p>
+        <% } %>
+
+        <p><%= post.description %></p>
+
+        <footer>
+          <small>
+            <% if (user && user.id === post.creatorId) { %>
+            <a href="/posts/edit/<%= post.id %>">Edit</a> •
+            <a href="/posts/deleteconfirm/<%= post.id %>">Delete</a>
+            <% } %>
+          </small>
+        </footer>
+      </article>
+
+      <!-- Comments Section -->
+      <section>
+        <h2>Comments (<%= post.comments.length %>)</h2>
+
+        <% if (post.comments.length === 0) { %>
+        <p><em>No comments yet. Be the first to comment!</em></p>
+        <% } else { %> <% post.comments.forEach(comment => { %>
+        <article>
+          <p><%= comment.description %></p>
+          <footer>
+            <small>
+              — <strong><%= comment.creator.uname %></strong> •
+              <%= comment.timestamp.toLocaleDateString() %>
+            </small>
+          </footer>
+        </article>
+        <% }) %> <% } %>
+      </section>
+
+      <!-- Add Comment Form (only if logged in) -->
+      <% if (user) { %>
+      <section>
+        <h3>Add a Comment</h3>
+        <form action="/posts/comment-create/<%= post.id %>" method="POST">
+          <label for="description">Your Comment</label>
+          <textarea
+            id="description"
+            name="description"
+            rows="3"
+            placeholder="Write your comment..."
+            required
+          ></textarea>
+          <button type="submit">Post Comment</button>
+        </form>
+      </section>
+      <% } else { %>
+      <p><a href="/auth/login">Log in</a> to add a comment</p>
+      <% } %>
     </main>
   </body>
 </html>
