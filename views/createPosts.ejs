@@ -4,56 +4,81 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.classless.min.css"
-    />
-    <link href="/css/style.css" rel="stylesheet" />
+    <link href="/css/tailwind.css" rel="stylesheet" />
     <title>Create Post</title>
   </head>
-  <body>
-    <main>
-      <div class="authOptions">
-        <h1>Create Post</h1>
-        <a role="button" href="/posts">Home</a>
+  <body class="bg-gray-50 min-h-screen">
+    <main class="max-w-2xl mx-auto p-6">
+      <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Create Post</h1>
+        <a
+          href="/posts"
+          class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition"
+          >Home</a
+        >
       </div>
 
-      <form action="/posts/create" method="POST">
-        <label for="title">Title</label>
-        <input
-          type="text"
-          id="title"
-          name="title"
-          placeholder="Enter post title"
-          required
-        />
+      <form action="/posts/create" method="POST" class="bg-white rounded-lg shadow-md p-6 space-y-4">
+        <div>
+          <label for="title" class="block text-sm font-medium text-gray-700 mb-1"
+            >Title</label
+          >
+          <input
+            type="text"
+            id="title"
+            name="title"
+            placeholder="Enter post title"
+            required
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
 
-        <label for="link">Link</label>
-        <input
-          type="text"
-          id="link"
-          name="link"
-          placeholder="Enter link (optional)"
-        />
+        <div>
+          <label for="link" class="block text-sm font-medium text-gray-700 mb-1"
+            >Link</label
+          >
+          <input
+            type="text"
+            id="link"
+            name="link"
+            placeholder="Enter link (optional)"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
 
-        <label for="description">Description</label>
-        <textarea
-          id="description"
-          name="description"
-          rows="4"
-          placeholder="Write a short description..."
-          required
-        ></textarea>
+        <div>
+          <label for="description" class="block text-sm font-medium text-gray-700 mb-1"
+            >Description</label
+          >
+          <textarea
+            id="description"
+            name="description"
+            rows="4"
+            placeholder="Write a short description..."
+            required
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          ></textarea>
+        </div>
 
-        <label for="subgroup">Subgroup</label>
-        <input
-          type="text"
-          id="subgroup"
-          name="subgroup"
-          placeholder="Enter subgroup name"
-        />
+        <div>
+          <label for="subgroup" class="block text-sm font-medium text-gray-700 mb-1"
+            >Subgroup</label
+          >
+          <input
+            type="text"
+            id="subgroup"
+            name="subgroup"
+            placeholder="Enter subgroup name"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
 
-        <button type="submit">Create Post</button>
+        <button
+          type="submit"
+          class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition font-medium"
+        >
+          Create Post
+        </button>
       </form>
     </main>
   </body>
