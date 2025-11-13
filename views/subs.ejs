@@ -9,16 +9,37 @@
       href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.classless.min.css"
     />
     <link href="/css/style.css" rel="stylesheet" />
-    <title>Subs</title>
+    <title>Subgroups</title>
   </head>
   <body>
     <main>
       <div class="authOptions">
-        <h1>Sub Groups</h1>
+        <h1>Subgroups</h1>
         <a role="button" href="/posts">Home</a>
       </div>
-      <div>
-        <p>Implement this page yourself. It is from subs.ejs</p>
+
+      <section>
+        <h2>Browse by Subgroup</h2>
+        <p>Explore posts organized by different topics and communities.</p>
+
+        <% if (subs.length === 0) { %>
+        <p><em>No subgroups found. Create a post to start a new subgroup!</em></p>
+        <% } else { %>
+        <div style="display: grid; gap: 1rem;">
+          <% subs.forEach(sub => { %>
+          <article style="margin: 0;">
+            <h3>
+              <a href="/subs/show/<%= sub %>">r/<%= sub %></a>
+            </h3>
+            <p>View all posts in the <%= sub %> subgroup</p>
+          </article>
+          <% }) %>
+        </div>
+        <% } %>
+      </section>
+
+      <div style="margin-top: 2rem;">
+        <a role="button" href="/posts">Back to All Posts</a>
       </div>
     </main>
   </body>

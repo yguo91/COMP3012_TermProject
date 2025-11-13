@@ -82,6 +82,24 @@ export async function editPost(post_id: number, changes: any = {}) {
   await prisma.post.update({ where: { id: post_id }, data });
 }
 
+export async function updatePost(
+  post_id: number,
+  title: string,
+  link: string,
+  description: string,
+  subgroup: string
+) {
+  return prisma.post.update({
+    where: { id: post_id },
+    data: {
+      title,
+      link,
+      description,
+      subgroup,
+    },
+  });
+}
+
 export async function deletePost(post_id: number) {
   // cascade manually where needed because of relations
   await prisma.comment.deleteMany({ where: { postId: post_id } });

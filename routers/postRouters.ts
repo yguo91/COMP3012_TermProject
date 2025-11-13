@@ -12,7 +12,7 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/create", ensureAuthenticated, (req, res) => {
-  res.render("createPosts");
+  res.render("createPosts", { mode: "create" });
 });
 
 router.post("/create", ensureAuthenticated, async (req, res) => {
@@ -50,26 +50,96 @@ router.get("/show/:postid", async (req, res) => {
 });
 
 router.get("/edit/:postid", ensureAuthenticated, async (req, res) => {
-  // ⭐ TODO
+  const postId = parseInt(req.params.postid);
+  const post = await db.getPost(postId);
+  if(!post){
+    return res.status(404).send("Post not found");
+  }
+
+  const user = req.user;
+  if(post.creator.id !== user.id){
+    return res.status(403).send("You are not authorized to edit this post");
+  }
+  res.render("createPosts", { post, user, mode: "edit" });
 });
 
 router.post("/edit/:postid", ensureAuthenticated, async (req, res) => {
-  // ⭐ TODO
+  const postId = parseInt(req.params.postid);
+  const { title, link, description, subgroup } = req.body;
+
+  // Fetch the post to check ownership
+  const post = await db.getPost(postId);
+  if (!post) {
+    return res.status(404).send("Post not found");
+  }
+
+  const user = req.user;
+  if (!user || user.id !== post.creatorId) {
+    return res.status(403).send("You are not allowed to edit this post.");
+  }
+
+  // Update the post (adjust to match your db helper)
+  await db.updatePost(
+    postId,
+    title,
+    link || "",
+    description,
+    subgroup || "general"
+  );
+
+  // Redirect back to the post page
+  res.redirect(`/posts/show/${postId}`);
 });
 
 router.get("/deleteconfirm/:postid", ensureAuthenticated, async (req, res) => {
-  // ⭐ TODO
+  const postId = parseInt(req.params.postid);
+  const post = await db.getPost(postId);
+
+  if (!post) {
+    return res.status(404).send("Post not found");
+  }
+
+  const user = req.user;
+  if (!user || user.id !== post.creatorId) {
+    return res.status(403).send("You are not allowed to delete this post.");
+  }
+
+  res.render("deleteConfirmPost", { post, user });
 });
 
 router.post("/delete/:postid", ensureAuthenticated, async (req, res) => {
-  // ⭐ TODO
+  const postId = parseInt(req.params.postid);
+
+  // Make sure the post exists & user owns it
+  const post = await db.getPost(postId);
+  if (!post) {
+    return res.status(404).send("Post not found");
+  }
+
+  const user = req.user;
+  if (!user || user.id !== post.creatorId) {
+    return res.status(403).send("You are not allowed to delete this post.");
+  }
+
+  // Delete from DB
+  await db.deletePost(postId);
+
+  // Redirect to homepage after deletion
+  res.redirect("/posts");
 });
 
-router.post(
-  "/comment-create/:postid",
-  ensureAuthenticated,
-  async (req, res) => {
-    // ⭐ TODO
+router.post("/comment-create/:postid", ensureAuthenticated, async (req, res) => {
+    const postId = parseInt(req.params.postid);
+
+    const { description } = req.body;
+
+    const creatorId = req.user.id;
+
+    // Add the comment to the database
+    await db.addComment(postId, creatorId, description);
+
+    // Redirect back to the post page
+    res.redirect(`/posts/show/${postId}`);
   }
 );
 

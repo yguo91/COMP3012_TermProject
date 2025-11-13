@@ -9,16 +9,54 @@
       href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.classless.min.css"
     />
     <link href="/css/style.css" rel="stylesheet" />
-    <title>Sub posts</title>
+    <title>r/<%= subname %></title>
   </head>
   <body>
     <main>
       <div class="authOptions">
-        <h1>Sub Posts</h1>
-        <a role="button" href="/posts">Home</a>
+        <h1>r/<%= subname %></h1>
+        <div>
+          <a role="button" href="/posts">Home</a>
+          <a role="button" href="/subs/list">All Subgroups</a>
+        </div>
       </div>
-      <div>
-        <p>Implement this page yourself. It is from sub.ejs</p>
+
+      <section>
+        <h2>Posts in r/<%= subname %></h2>
+
+        <% if (posts.length === 0) { %>
+        <p><em>No posts in this subgroup yet. Be the first to post!</em></p>
+        <% } else { %>
+        <div>
+          <% posts.forEach(post => { %>
+          <div class="individualPost">
+            <article style="margin-bottom: 1rem;">
+              <h3>
+                <a href="/posts/show/<%= post.id %>"><%= post.title %></a>
+              </h3>
+              <p><%= post.description %></p>
+              <footer>
+                <small>
+                  Posted by <strong><%= post.creator?.uname || 'Unknown' %></strong> •
+                  <%= post.timestamp.toLocaleDateString() %>
+                  <% if (post.comments) { %>
+                  • <%= post.comments.length %> comment<%= post.comments.length !== 1 ? 's' : '' %>
+                  <% } %>
+                </small>
+              </footer>
+            </article>
+          </div>
+          <% }) %>
+        </div>
+        <% } %>
+      </section>
+
+      <div style="margin-top: 2rem;">
+        <% if (user) { %>
+        <a role="button" href="/posts/create">Create Post</a>
+        <% } else { %>
+        <p><a href="/auth/login">Log in</a> to create a post in this subgroup</p>
+        <% } %>
       </div>
     </main>
   </body>
