@@ -134,6 +134,76 @@ async function nextCommentId() {
   return (last?.id ?? 9000) + 1;
 }
 
+// ========== VOTING FUNCTIONS ==========
+
+/**
+ * Add or update a vote for a post by a user
+ * @param userId - The ID of the user voting
+ * @param postId - The ID of the post being voted on
+ * @param value - The vote value: +1 (upvote), -1 (downvote), or 0 (remove vote)
+ */
+export async function addVote(userId: number, postId: number, value: number) {
+  // If value is 0, delete the vote (user is canceling their vote)
+  if (value === 0) {
+    await prisma.vote.deleteMany({
+      where: {
+        userId: userId,
+        postId: postId,
+      },
+    });
+    return;
+  }
+
+  // Otherwise, upsert the vote (create if doesn't exist, update if it does)
+  await prisma.vote.upsert({
+    where: {
+      userId_postId: {
+        userId: userId,
+        postId: postId,
+      },
+    },
+    update: {
+      value: value,
+    },
+    create: {
+      userId: userId,
+      postId: postId,
+      value: value,
+    },
+  });
+}
+
+/**
+ * Get a specific user's vote on a specific post
+ * @param userId - The ID of the user
+ * @param postId - The ID of the post
+ * @returns The vote object if exists, null otherwise
+ */
+export async function getVoteForUserPost(userId: number, postId: number) {
+  return prisma.vote.findUnique({
+    where: {
+      userId_postId: {
+        userId: userId,
+        postId: postId,
+      },
+    },
+  });
+}
+
+/**
+ * Calculate the net vote total for a post (upvotes - downvotes)
+ * @param postId - The ID of the post
+ * @returns The net vote total as a number
+ */
+export async function getVoteTotalForPost(postId: number) {
+  const votes = await prisma.vote.findMany({
+    where: { postId: postId },
+  });
+
+  // Sum all vote values (positive votes - negative votes)
+  return votes.reduce((total, vote) => total + vote.value, 0);
+}
+
 // Optional: debug() to print some counts like the old file
 export async function debug() {
   const [u, p, c, v] = await Promise.all([
