@@ -4,43 +4,131 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.classless.min.css"
-    />
+    <link href="/css/tailwind.css" rel="stylesheet" />
     <link href="/css/style.css" rel="stylesheet" />
-    <title>Subgroups</title>
+    <title>Explore Subgroups - Reddit Clone</title>
+    <script>
+      // Check for saved theme preference or default to light mode
+      if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
+      }
+    </script>
   </head>
-  <body>
-    <main>
-      <div class="authOptions">
-        <h1>Subgroups</h1>
-        <a role="button" href="/posts">Home</a>
+  <body class="bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <!-- Navigation Bar -->
+    <nav class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+          <a href="/posts" class="text-2xl font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">📱 Reddit Clone</a>
+          <div class="flex items-center space-x-3">
+            <!-- Dark Mode Toggle -->
+            <button id="theme-toggle" class="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+              <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 text-gray-800 dark:text-gray-200" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+              </svg>
+              <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 text-gray-800 dark:text-gray-200" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path>
+              </svg>
+            </button>
+
+            <a href="/posts" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+              ← Back to Home
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <!-- Header -->
+      <div class="bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 dark:from-purple-700 dark:via-pink-700 dark:to-red-700 rounded-xl shadow-lg p-8 mb-8 ring ring-gray-900/5 dark:ring-gray-100/10">
+        <h1 class="text-4xl font-bold mb-2 text-white">📂 Explore Subgroups</h1>
+        <p class="text-purple-100 dark:text-purple-200">Discover communities and join the conversation</p>
       </div>
 
-      <section>
-        <h2>Browse by Subgroup</h2>
-        <p>Explore posts organized by different topics and communities.</p>
+      <!-- Subgroups Grid -->
+      <div>
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-xl font-bold text-gray-900 dark:text-white">All Communities</h3>
+          <span class="text-sm text-gray-500 dark:text-gray-400"><%= subs.length %> subgroup<%= subs.length !== 1 ? 's' : '' %></span>
+        </div>
 
         <% if (subs.length === 0) { %>
-        <p><em>No subgroups found. Create a post to start a new subgroup!</em></p>
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-12 text-center ring ring-gray-900/5 dark:ring-gray-100/10">
+            <div class="text-6xl mb-4">📭</div>
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">No subgroups yet</h3>
+            <p class="text-gray-500 dark:text-gray-400 mb-6">Create a post to start a new community!</p>
+            <a href="/posts/create" class="inline-block px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition font-medium">
+              Create First Post
+            </a>
+          </div>
         <% } else { %>
-        <div style="display: grid; gap: 1rem;">
-          <% subs.forEach(sub => { %>
-          <article style="margin: 0;">
-            <h3>
-              <a href="/subs/show/<%= sub %>">r/<%= sub %></a>
-            </h3>
-            <p>View all posts in the <%= sub %> subgroup</p>
-          </article>
-          <% }) %>
-        </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <% subs.forEach(sub => { %>
+              <a href="/subs/show/<%= sub %>" class="group">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl dark:shadow-gray-900/50 transition-all p-6 border-2 border-transparent group-hover:border-blue-500 dark:group-hover:border-blue-400 ring ring-gray-900/5 dark:ring-gray-100/10">
+                  <div class="flex items-center space-x-4">
+                    <div class="w-16 h-16 bg-gradient-to-br from-blue-400 to-purple-500 dark:from-blue-500 dark:to-purple-600 rounded-full flex items-center justify-center text-3xl shadow-lg">
+                      📱
+                    </div>
+                    <div class="flex-1">
+                      <h4 class="text-2xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition">
+                        r/<%= sub %>
+                      </h4>
+                      <p class="text-sm text-gray-500 dark:text-gray-400">Click to explore posts</p>
+                    </div>
+                    <div class="text-blue-500 dark:text-blue-400 text-2xl group-hover:translate-x-1 transition-transform">
+                      →
+                    </div>
+                  </div>
+                </div>
+              </a>
+            <% }) %>
+          </div>
         <% } %>
-      </section>
+      </div>
 
-      <div style="margin-top: 2rem;">
-        <a role="button" href="/posts">Back to All Posts</a>
+      <!-- Call to Action -->
+      <div class="mt-12 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-6 text-center ring ring-gray-900/5 dark:ring-gray-100/10">
+        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Can't find what you're looking for?</h3>
+        <p class="text-gray-600 dark:text-gray-400 mb-4">Create a post in a new subgroup to start your own community!</p>
+        <a href="/posts/create" class="inline-block px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition font-medium">
+          + Create New Post
+        </a>
       </div>
     </main>
+
+    <script>
+      // Dark mode toggle functionality
+      const themeToggleBtn = document.getElementById('theme-toggle');
+      const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+      const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+
+      // Show the correct icon based on current theme
+      if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        themeToggleLightIcon.classList.remove('hidden');
+      } else {
+        themeToggleDarkIcon.classList.remove('hidden');
+      }
+
+      // Toggle dark mode
+      themeToggleBtn.addEventListener('click', function() {
+        // Toggle icons
+        themeToggleDarkIcon.classList.toggle('hidden');
+        themeToggleLightIcon.classList.toggle('hidden');
+
+        // Toggle dark class on html element
+        if (document.documentElement.classList.contains('dark')) {
+          document.documentElement.classList.remove('dark');
+          localStorage.setItem('theme', 'light');
+        } else {
+          document.documentElement.classList.add('dark');
+          localStorage.setItem('theme', 'dark');
+        }
+      });
+    </script>
   </body>
 </html>

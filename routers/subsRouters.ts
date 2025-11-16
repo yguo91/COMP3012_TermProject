@@ -19,7 +19,20 @@ router.get("/show/:subname", async (req, res) => {
   // Get current user (if logged in)
   const user = req.user;
 
-  res.render("sub", { posts, subname, user });
+  // Get vote totals and user votes for each post
+  const postsWithVotes = await Promise.all(
+    posts.map(async (post) => {
+      const voteTotal = await db.getVoteTotalForPost(post.id);
+      const userVote = user ? await db.getVoteForUserPost(user.id, post.id) : null;
+      return {
+        ...post,
+        voteTotal,
+        userVote: userVote?.value || 0,
+      };
+    })
+  );
+
+  res.render("sub", { posts: postsWithVotes, subname, user });
 });
 
 export default router;

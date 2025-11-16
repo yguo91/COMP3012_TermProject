@@ -1,61 +1,120 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.classless.min.css"
-    />
+    <link href="/css/tailwind.css" rel="stylesheet" />
     <link href="/css/style.css" rel="stylesheet" />
-    <title>r/<%= subname %></title>
+    <title>r/<%= subname %> - Reddit Clone</title>
   </head>
-  <body>
-    <main>
-      <div class="authOptions">
-        <h1>r/<%= subname %></h1>
-        <div>
-          <a role="button" href="/posts">Home</a>
-          <a role="button" href="/subs/list">All Subgroups</a>
+  <body class="bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <!-- Navigation Bar -->
+    <nav class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+          <a href="/posts" class="text-2xl font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">📱 Reddit Clone</a>
+          <div class="flex space-x-3">
+            <a href="/posts" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+              🏠 Home
+            </a>
+            <a href="/subs/list" class="px-4 py-2 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900 transition">
+              📂 All Subgroups
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <!-- Subgroup Header -->
+      <div class="bg-gradient-to-r from-blue-500 to-indigo-600 dark:from-blue-600 dark:to-indigo-700 rounded-xl shadow-lg p-8 mb-8 text-white ring ring-gray-900/5 dark:ring-gray-100/10">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-4xl font-bold mb-2">r/<%= subname %></h1>
+            <p class="text-blue-100 dark:text-blue-200">Community discussions and posts</p>
+          </div>
+          <% if (user) { %>
+            <a href="/posts/create" class="px-6 py-3 bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700 transition font-bold shadow-md">
+              + New Post
+            </a>
+          <% } %>
         </div>
       </div>
 
-      <section>
-        <h2>Posts in r/<%= subname %></h2>
+      <!-- Posts Section -->
+      <div class="space-y-4">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-bold text-gray-900 dark:text-white">📰 Posts</h3>
+          <span class="text-sm text-gray-500 dark:text-gray-400"><%= posts.length %> post<%= posts.length !== 1 ? 's' : '' %></span>
+        </div>
 
         <% if (posts.length === 0) { %>
-        <p><em>No posts in this subgroup yet. Be the first to post!</em></p>
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-12 text-center ring ring-gray-900/5 dark:ring-gray-100/10">
+            <div class="text-6xl mb-4">📭</div>
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">No posts in this subgroup yet</h3>
+            <p class="text-gray-500 dark:text-gray-400 mb-6">Be the first to start a discussion!</p>
+            <% if (user) { %>
+              <a href="/posts/create" class="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
+                Create First Post
+              </a>
+            <% } else { %>
+              <a href="/auth/login" class="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
+                Log in to Post
+              </a>
+            <% } %>
+          </div>
         <% } else { %>
-        <div>
           <% posts.forEach(post => { %>
-          <div class="individualPost">
-            <article style="margin-bottom: 1rem;">
-              <h3>
-                <a href="/posts/show/<%= post.id %>"><%= post.title %></a>
-              </h3>
-              <p><%= post.description %></p>
-              <footer>
-                <small>
-                  Posted by <strong><%= post.creator?.uname || 'Unknown' %></strong> •
-                  <%= post.timestamp.toLocaleDateString() %>
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg dark:shadow-gray-900/50 transition-shadow p-4 ring ring-gray-900/5 dark:ring-gray-100/10">
+            <div class="flex gap-4">
+              <!-- Voting Section -->
+              <div class="flex flex-col items-center min-w-[60px] space-y-1">
+                <% if (user) { %>
+                  <form action="/posts/vote/<%= post.id %>" method="POST" class="m-0">
+                    <input type="hidden" name="setvoteto" value="<%= post.userVote === 1 ? 0 : 1 %>">
+                    <button type="submit" class="vote-btn <%= post.userVote === 1 ? 'active-upvote' : '' %> text-2xl">
+                      👍
+                    </button>
+                  </form>
+                  <span class="font-bold text-lg text-gray-700 dark:text-gray-200"><%= post.voteTotal %></span>
+                  <form action="/posts/vote/<%= post.id %>" method="POST" class="m-0">
+                    <input type="hidden" name="setvoteto" value="<%= post.userVote === -1 ? 0 : -1 %>">
+                    <button type="submit" class="vote-btn <%= post.userVote === -1 ? 'active-downvote' : '' %> text-2xl">
+                      👎
+                    </button>
+                  </form>
+                <% } else { %>
+                  <span class="text-2xl opacity-30">👍</span>
+                  <span class="font-bold text-lg text-gray-700 dark:text-gray-200"><%= post.voteTotal %></span>
+                  <span class="text-2xl opacity-30">👎</span>
+                <% } %>
+              </div>
+
+              <!-- Post Content -->
+              <div class="flex-1">
+                <a href="/posts/show/<%= post.id %>" class="block group">
+                  <h4 class="text-xl font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition mb-2">
+                    <%= post.title %>
+                  </h4>
+                  <p class="text-gray-600 dark:text-gray-400 line-clamp-2 mb-3"><%= post.description %></p>
+                </a>
+                <div class="flex items-center text-sm text-gray-500 dark:text-gray-400 space-x-3">
+                  <span class="flex items-center">
+                    👤 <strong class="ml-1 text-gray-700 dark:text-gray-300"><%= post.creator?.uname || 'Unknown' %></strong>
+                  </span>
+                  <span>•</span>
+                  <span>📅 <%= post.timestamp.toLocaleDateString() %></span>
                   <% if (post.comments) { %>
-                  • <%= post.comments.length %> comment<%= post.comments.length !== 1 ? 's' : '' %>
+                    <span>•</span>
+                    <span>💬 <%= post.comments.length %> comment<%= post.comments.length !== 1 ? 's' : '' %></span>
                   <% } %>
-                </small>
-              </footer>
-            </article>
+                </div>
+              </div>
+            </div>
           </div>
           <% }) %>
-        </div>
-        <% } %>
-      </section>
-
-      <div style="margin-top: 2rem;">
-        <% if (user) { %>
-        <a role="button" href="/posts/create">Create Post</a>
-        <% } else { %>
-        <p><a href="/auth/login">Log in</a> to create a post in this subgroup</p>
         <% } %>
       </div>
     </main>

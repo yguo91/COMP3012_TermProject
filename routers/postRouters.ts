@@ -8,7 +8,21 @@ import { ensureAuthenticated } from "../middleware/checkAuth";
 router.get("/", async (req, res) => {
   const posts = await database.getPosts(20);
   const user = await req.user;
-  res.render("posts", { posts, user });
+
+  // Get vote totals and user votes for each post
+  const postsWithVotes = await Promise.all(
+    posts.map(async (post) => {
+      const voteTotal = await db.getVoteTotalForPost(post.id);
+      const userVote = user ? await db.getVoteForUserPost(user.id, post.id) : null;
+      return {
+        ...post,
+        voteTotal,
+        userVote: userVote?.value || 0,
+      };
+    })
+  );
+
+  res.render("posts", { posts: postsWithVotes, user });
 });
 
 router.get("/create", ensureAuthenticated, (req, res) => {
@@ -45,8 +59,17 @@ router.get("/show/:postid", async (req, res) => {
   // Get the current user (if logged in)
   const user = req.user;
 
+  // Get vote total and user's vote on this post
+  const voteTotal = await db.getVoteTotalForPost(postId);
+  const userVote = user ? await db.getVoteForUserPost(user.id, postId) : null;
+
   // Render the view with the post data
-  res.render("individualPost", { post, user });
+  res.render("individualPost", {
+    post,
+    user,
+    voteTotal,
+    userVote: userVote?.value || 0
+  });
 });
 
 router.get("/edit/:postid", ensureAuthenticated, async (req, res) => {
@@ -142,5 +165,28 @@ router.post("/comment-create/:postid", ensureAuthenticated, async (req, res) => 
     res.redirect(`/posts/show/${postId}`);
   }
 );
+
+router.post("/vote/:postid", ensureAuthenticated, async (req, res) => {
+  const postId = parseInt(req.params.postid);
+  const { setvoteto } = req.body;
+
+  // Convert vote value to number (should be 1, -1, or 0)
+  const voteValue = parseInt(setvoteto);
+
+  // Validate vote value
+  if (![1, -1, 0].includes(voteValue)) {
+    return res.status(400).send("Invalid vote value. Must be 1, -1, or 0.");
+  }
+
+  // Get the logged-in user's ID
+  const userId = req.user.id;
+
+  // Add/update the vote in the database
+  await db.addVote(userId, postId, voteValue);
+
+  // Redirect back to where the user came from, or to the post page
+  const referer = req.get("Referer") || `/posts/show/${postId}`;
+  res.redirect(referer);
+});
 
 export default router;

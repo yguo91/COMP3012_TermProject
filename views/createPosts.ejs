@@ -12,22 +12,58 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link href="/css/tailwind.css" rel="stylesheet" />
-    <title><%= pageTitle %></title>
+    <link href="/css/style.css" rel="stylesheet" />
+    <title><%= pageTitle %> - Reddit Clone</title>
+    <script>
+      // Check for saved theme preference or default to light mode
+      if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
+      }
+    </script>
   </head>
-  <body class="bg-gray-50 min-h-screen">
+  <body class="bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <!-- Navigation Bar -->
+    <nav class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+      <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+          <a href="/posts" class="text-2xl font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">📱 Reddit Clone</a>
+          <div class="flex items-center space-x-3">
+            <!-- Dark Mode Toggle -->
+            <button id="theme-toggle" class="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+              <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 text-gray-800 dark:text-gray-200" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+              </svg>
+              <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 text-gray-800 dark:text-gray-200" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path>
+              </svg>
+            </button>
+
+            <a href="/posts" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+              ← Home
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
     <main class="max-w-2xl mx-auto p-6">
-      <div class="flex justify-between items-center mb-8">
-        <h1 class="text-3xl font-bold text-gray-900"><%= pageTitle %></h1>
-        <a
-          href="/posts"
-          class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition"
-          >Home</a
-        >
+      <!-- Page Header -->
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white"><%= pageTitle %></h1>
+        <p class="text-gray-600 dark:text-gray-400 mt-2">
+          <% if (isEditMode) { %>
+            Update your post details below
+          <% } else { %>
+            Share your thoughts with the community
+          <% } %>
+        </p>
       </div>
 
-      <form action="<%= formAction %>" method="POST" class="bg-white rounded-lg shadow-md p-6 space-y-4">
+      <form action="<%= formAction %>" method="POST" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 space-y-4 ring ring-gray-900/5 dark:ring-gray-100/10">
         <div>
-          <label for="title" class="block text-sm font-medium text-gray-700 mb-1"
+          <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
             >Title</label
           >
           <input
@@ -37,55 +73,55 @@
             placeholder="Enter post title"
             value="<%= isEditMode ? post.title : '' %>"
             required
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 placeholder-gray-400 dark:placeholder-gray-500"
           />
         </div>
 
         <div>
-          <label for="link" class="block text-sm font-medium text-gray-700 mb-1"
-            >Link</label
+          <label for="link" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >Link (optional)</label
           >
           <input
             type="text"
             id="link"
             name="link"
-            placeholder="Enter link (optional)"
+            placeholder="https://example.com"
             value="<%= isEditMode ? (post.link || '') : '' %>"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 placeholder-gray-400 dark:placeholder-gray-500"
           />
         </div>
 
         <div>
-          <label for="description" class="block text-sm font-medium text-gray-700 mb-1"
+          <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
             >Description</label
           >
           <textarea
             id="description"
             name="description"
-            rows="4"
-            placeholder="Write a short description..."
+            rows="5"
+            placeholder="Share your thoughts with the community..."
             required
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 placeholder-gray-400 dark:placeholder-gray-500"
           ><%= isEditMode ? post.description : '' %></textarea>
         </div>
 
         <div>
-          <label for="subgroup" class="block text-sm font-medium text-gray-700 mb-1"
+          <label for="subgroup" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
             >Subgroup</label
           >
           <input
             type="text"
             id="subgroup"
             name="subgroup"
-            placeholder="Enter subgroup name"
+            placeholder="e.g., gaming, technology, books"
             value="<%= isEditMode ? post.subgroup : '' %>"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 placeholder-gray-400 dark:placeholder-gray-500"
           />
         </div>
 
         <button
           type="submit"
-          class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition font-medium"
+          class="w-full bg-blue-600 dark:bg-blue-500 text-white py-3 px-4 rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition font-medium text-lg shadow-lg hover:shadow-xl"
         >
           <%= buttonText %>
         </button>
@@ -93,12 +129,42 @@
         <% if (isEditMode) { %>
         <a
           href="/posts/show/<%= post.id %>"
-          class="block w-full text-center py-2 px-4 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition"
+          class="block w-full text-center py-2 px-4 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition"
         >
           Cancel
         </a>
         <% } %>
       </form>
     </main>
+
+    <script>
+      // Dark mode toggle functionality
+      const themeToggleBtn = document.getElementById('theme-toggle');
+      const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+      const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+
+      // Show the correct icon based on current theme
+      if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        themeToggleLightIcon.classList.remove('hidden');
+      } else {
+        themeToggleDarkIcon.classList.remove('hidden');
+      }
+
+      // Toggle dark mode
+      themeToggleBtn.addEventListener('click', function() {
+        // Toggle icons
+        themeToggleDarkIcon.classList.toggle('hidden');
+        themeToggleLightIcon.classList.toggle('hidden');
+
+        // Toggle dark class on html element
+        if (document.documentElement.classList.contains('dark')) {
+          document.documentElement.classList.remove('dark');
+          localStorage.setItem('theme', 'light');
+        } else {
+          document.documentElement.classList.add('dark');
+          localStorage.setItem('theme', 'dark');
+        }
+      });
+    </script>
   </body>
 </html>

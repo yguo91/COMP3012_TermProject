@@ -4,45 +4,162 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.classless.min.css"
-    />
+    <link href="/css/tailwind.css" rel="stylesheet" />
     <link href="/css/style.css" rel="stylesheet" />
-    <title>Homepage</title>
+    <title>Homepage - Reddit Clone</title>
+    <script>
+      // Check for saved theme preference or default to light mode
+      if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
+      }
+    </script>
   </head>
-  <body>
-    <main>
-      <div class="authOptions">
-        <h1>Homepage</h1>
-        <% if (!user) { %>
-        <a role="button" href="/auth/login">Login</a>
+  <body class="bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <!-- Navigation Bar -->
+    <nav class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+          <div class="flex items-center space-x-4">
+            <h1 class="text-2xl font-bold text-blue-600 dark:text-blue-400">📱 Reddit Clone </h1>
+            <a href="/subs/list" class="text-gray-600 dark:text-gray-300 hover:text-blue-690 dark:hover:text-white transition">
+              Explore Subgroups
+            </a>
+          </div>
+          <div class="flex items-center space-x-3">
+            <!-- Dark Mode Toggle -->
+            <button id="theme-toggle" class="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+              <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 text-gray-800 dark:text-gray-200" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+              </svg>
+              <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 text-gray-800 dark:text-gray-200" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path>
+              </svg>
+            </button>
+
+            <% if (user) { %>
+              <a href="/posts/create" class="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition font-medium">
+                + Create Post
+              </a>
+              <span class="text-gray-700 dark:text-gray-200 font-medium">👤 <%= user.uname %></span>
+              <a href="/auth/logout" class="px-4 py-2 bg-red-500 dark:bg-red-600 text-white rounded-lg hover:bg-red-600 dark:hover:bg-red-700 transition">
+                Logout
+              </a>
+            <% } else { %>
+              <a href="/auth/login" class="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition">
+                Login
+              </a>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <!-- Welcome Section -->
+      <div class="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 dark:from-blue-700 dark:via-indigo-700 dark:to-purple-800 rounded-xl shadow-lg p-6 mb-8 ring ring-gray-900/5 dark:ring-gray-100/10">
+        <h2 class="text-3xl font-bold mb-2 text-gary">Welcome, <%= user?.uname || "Visitor" %>! </h2>
+        <p class="text-blue-100 dark:text-blue-200">Explore the latest posts from our community</p>
+      </div>
+
+      <!-- Posts Section -->
+      <div class="space-y-4">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-bold text-gray-900 dark:text-white">📰 Recent Posts</h3>
+          <span class="text-sm text-gray-500 dark:text-gray-400"><%= posts.length %> posts</span>
+        </div>
+
+        <% if (posts.length === 0) { %>
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center ring ring-gray-900/5 dark:ring-gray-100/10">
+            <p class="text-gray-500 dark:text-gray-400 text-lg">No posts yet. Be the first to create one!</p>
+            <% if (user) { %>
+              <a href="/posts/create" class="mt-4 inline-block px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition">
+                Create First Post
+              </a>
+            <% } %>
+          </div>
         <% } else { %>
-        <a role="button" href="/auth/logout">Logout</a>
+          <% posts.forEach(post => { %>
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg dark:shadow-gray-900/50 transition-shadow p-4 ring ring-gray-900/5 dark:ring-gray-100/10">
+            <div class="flex gap-4">
+              <!-- Voting Section -->
+              <div class="flex flex-col items-center min-w-[60px] space-y-1">
+                <% if (user) { %>
+                  <form action="/posts/vote/<%= post.id %>" method="POST" class="m-0">
+                    <input type="hidden" name="setvoteto" value="<%= post.userVote === 1 ? 0 : 1 %>">
+                    <button type="submit" class="vote-btn <%= post.userVote === 1 ? 'active-upvote' : '' %> text-2xl">
+                      👍
+                    </button>
+                  </form>
+                  <span class="font-bold text-lg text-gray-700 dark:text-gray-200"><%= post.voteTotal %></span>
+                  <form action="/posts/vote/<%= post.id %>" method="POST" class="m-0">
+                    <input type="hidden" name="setvoteto" value="<%= post.userVote === -1 ? 0 : -1 %>">
+                    <button type="submit" class="vote-btn <%= post.userVote === -1 ? 'active-downvote' : '' %> text-2xl">
+                      👎
+                    </button>
+                  </form>
+                <% } else { %>
+                  <span class="text-2xl opacity-30">👍</span>
+                  <span class="font-bold text-lg text-gray-700 dark:text-gray-200"><%= post.voteTotal %></span>
+                  <span class="text-2xl opacity-30">👎</span>
+                <% } %>
+              </div>
+
+              <!-- Post Content -->
+              <div class="flex-1">
+                <a href="/posts/show/<%= post.id %>" class="block group">
+                  <h4 class="text-xl font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition mb-2">
+                    <%= post.title %>
+                  </h4>
+                  <p class="text-gray-600 dark:text-gray-400 line-clamp-2 mb-3"><%= post.description %></p>
+                </a>
+                <div class="flex items-center text-sm text-gray-500 dark:text-gray-400 space-x-3">
+                  <span class="flex items-center">
+                    👤 <strong class="ml-1 text-gray-700 dark:text-gray-300"><%= post.creator?.uname || 'Unknown' %></strong>
+                  </span>
+                  <span>•</span>
+                  <a href="/subs/show/<%= post.subgroup %>" class="px-2 py-1 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-full hover:bg-blue-200 dark:hover:bg-blue-900 transition text-xs font-medium">
+                    r/<%= post.subgroup %>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <% }) %>
         <% } %>
       </div>
-      <h2>Welcome, <%= user?.uname || "Visitor" %></h2>
-      <div>
-        <p>All Posts</p>
-        <% posts.forEach(post => { %>
-        <div class="individualPost">
-          <a href="/posts/show/<%=post.id%>"><%= post.title %></a>
-          <p><%= post.description %></p>
-        </div>
-        <% }) %>
-      </div>
-
-      <div>
-        <a href="/subs/list">Subgroups</a>
-      </div>
-
-      <div>
-        <a role="button" href="/posts/create">Create Post</a>
-      </div>
-      <p style="color: rgb(197, 172, 172)">
-        😦 Heads up...you probably want to hide the Create Post button above for
-        non-logged-in users!
-      </p>
     </main>
+
+    <script>
+      // Dark mode toggle functionality
+      const themeToggleBtn = document.getElementById('theme-toggle');
+      const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+      const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+
+      // Show the correct icon based on current theme
+      if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        themeToggleLightIcon.classList.remove('hidden');
+      } else {
+        themeToggleDarkIcon.classList.remove('hidden');
+      }
+
+      // Toggle dark mode
+      themeToggleBtn.addEventListener('click', function() {
+        // Toggle icons
+        themeToggleDarkIcon.classList.toggle('hidden');
+        themeToggleLightIcon.classList.toggle('hidden');
+
+        // Toggle dark class on html element
+        if (document.documentElement.classList.contains('dark')) {
+          document.documentElement.classList.remove('dark');
+          localStorage.setItem('theme', 'light');
+        } else {
+          document.documentElement.classList.add('dark');
+          localStorage.setItem('theme', 'dark');
+        }
+      });
+    </script>
   </body>
 </html>
