@@ -1,5 +1,12 @@
 import dotenv from "dotenv";
-dotenv.config(); // Load .env file FIRST!
+// Suppress dotenv promotional messages
+const originalLog = console.log;
+console.log = (...args) => {
+  if (args[0]?.includes?.('[dotenv@')) return;
+  originalLog(...args);
+};
+dotenv.config(); // Load .env file
+console.log = originalLog; // Restore original console.log
 
 import express from "express";
 import session from "express-session";
