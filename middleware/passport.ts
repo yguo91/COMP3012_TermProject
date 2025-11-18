@@ -20,7 +20,7 @@ const localLogin = new LocalStrategy(
     const user = await getUserByEmailIdAndPassword(uname, password);
     // console.log('passport 13: '+ user.uname);
     return user
-      ? done(null, user)
+      ? done(null, user as Express.User)
       : done(null, false, {
           message: "Your login details are not valid. Please try again.",
         });
@@ -43,7 +43,7 @@ passport.deserializeUser(async function (
 ) {
   const user = await getUserById(id);
   if (user) {
-    done(null, user);
+    done(null, user as Express.User);
   } else {
     done({ message: "User not found" }, null);
   }
