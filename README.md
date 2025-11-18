@@ -1,230 +1,330 @@
-# Term Assignment
+# 📱 Reddit Clone - COMP3012 Term Project
 
-## Introduction
+A full-featured Reddit-style social platform built with Express.js, TypeScript, and Prisma. Features include user authentication (local + Google OAuth 2.0), voting system, subgroups, comments, and a modern dark mode UI.
 
-In this assignment, you will demonstrate an ability to make a multi-page app, with no need to write front-end JavaScript. You will use Express.js, including a templating engine, to implement multiple routes across multiple resources, and you will use passport to allow users to login.
+## ✨ Features
 
-In particular, this application will behave similar to the social network Reddit.
+### Core Functionality
+- 🔐 **Dual Authentication System**
+  - Local authentication (username/password)
+  - Google OAuth 2.0 integration
+- 📝 **Post Management**
+  - Create, edit, and delete posts
+  - Rich post details (title, link, description)
+  - Organized by subgroups (categories)
+- 💬 **Comments**
+  - Add comments to posts
+  - View all comments on individual post pages
+- 👍👎 **Voting System**
+  - Upvote/downvote posts
+  - Real-time vote totals
+  - Visual indication of user's vote
+- 🏷️ **Subgroups**
+  - Dynamic subgroup creation
+  - Browse posts by subgroup
+  - Explore all available subgroups
 
-## Types of Resources
+### UI/UX
+- 🌓 **Dark Mode Support**
+  - Toggle between light and dark themes
+  - Persistent theme preference (localStorage)
+  - Smooth transitions
+- 🎨 **Modern Design**
+  - Built with Tailwind CSS
+  - Responsive layout
+  - Gradient accents and smooth animations
+- 📱 **Mobile-Friendly**
+  - Responsive design works on all screen sizes
 
-### Users
+## 🛠️ Tech Stack
 
-- **USERS** correspond to people who can log in.
-  - Users directly have this data:
-    - id
-    - uname
-    - password
-  - Users relate to this other data:
-    - they may have created zero or more postings
-    - they may have created zero or more comments
-    - for a post, they may have voted it up, or down, or not at all
-    - for a comment, they may have voted it up, or down, or not at all
+- **Backend**: Node.js, Express.js, TypeScript
+- **Database**: SQLite with Prisma ORM
+- **Authentication**: Passport.js (Local + Google OAuth 2.0)
+- **Templating**: EJS (Embedded JavaScript)
+- **Styling**: Tailwind CSS
+- **Build Tool**: tsx (TypeScript execution)
 
-### Subgroups
+## 📋 Prerequisites
 
-- **SUBGROUPS** are categories of the site. Every post belongs to one subgroup. Unlike real reddit, subgroups are created dynamically, simply by saying a post belongs to one.
-  - Subgroups directly have this data:
-    - name
-  - Subgroups relate to this other data:
-    - subs always contain one or more postings
+- Node.js (v16 or higher)
+- npm or yarn
+- Google Cloud Console account (for OAuth setup)
 
-### Postings
+## 🚀 Installation
 
-- **POSTINGS** are the main content of the site. The purpose of a posting is a link, presumably to some external site. Postings also have some explanatory text, and a title. Postings can be voted up or voted down, and thus have a vote total.
-  - Postings directly have this data:
-    - id
-    - title
-    - link
-    - description
-    - creator
-    - subgroup
-    - timestamp
-  - Postings relate to this other data:
-    - they're by a user
-    - they're in a sub
-    - they have zero or more comments
-    - they have a vote total
+### 1. Clone the Repository
 
-### Comments
+```bash
+git clone <your-repo-url>
+cd termprojstarter
+```
 
-- **_COMMENTS_**
-  - Comments directly have this data:
-    - id
-    - description
-    - creator
-    - postid
-    - timestamp
-  - Comments relate to this other data:
-    - they're by a user
-    - they belong to a post
+### 2. Install Dependencies
 
-## Actual Requirements, organized by Grade
+```bash
+npm install
+```
 
-### PASS
+### 3. Set Up Environment Variables
 
-✅ Users must be able to log in and log out.
+Copy the example environment file:
 
-Users must be able to create posts and comment on posts.
+```bash
+cp .env.example .env
+```
 
-Posts are placed into subgroups, simply by specifying a subgroup during post-creation.
+Edit `.env` and fill in your actual values:
 
-#### Routes Required
+```env
+DATABASE_URL="file:./dev.db"
 
-All GET routes, unless otherwise specified, should `res.render` a template. All POST routes, unless otherwise specified, should do their work and then `res.redirect`.
+# Google OAuth 2.0 credentials
+GOOGLE_CLIENT_ID=your-actual-client-id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your-actual-client-secret
+GOOGLE_CALLBACK_URL=http://localhost:8000/auth/google/callback
+```
 
-- authentication work
-  - `GET /login` ✅
-  - `POST /login` ✅
-  - `POST /logout` ✅
-- home
-  - `GET /` (redirects to /posts or /login)
-    - shows a listing of the most recent 20 posts ✅
-      - each entry has a link, which uses the title for its visible text ✅
-      - each entry also lists the user that created it
-- subs
+**⚠️ Important**: Never commit your `.env` file to Git! It contains sensitive credentials.
 
-  - `GET /subs/list`
-    - shows a list of all existing subs that have at least one post
-      - each entry is a link to the appropriate `GET /subs/show/:subname`
-      - sort them predictably somehow, either alphabetical or by-post-count or something, up to you
-  - `GET /subs/show/:subname`
-    - same as `GET /`, but filtered to only show posts that match the subname
+### 4. Set Up the Database
 
-- individual posts
-  - `GET /posts/show/:postid`
-    - shows post title, post link, timestamp, and creator
-    - also has a list of _all comments_ related to this post
-      - each of these should show the comment description, creator, and timestamp
-      - optionally, each comment could have a link to delete it
-    - if you're logged in, a form for commenting should show
-  - `GET /posts/create`
-    - form for creating a new post
-  - `POST /posts/create`
-    - processes the creation
-    - doesn't allow invalid creations, for example if there's no link and also no description
-      - (no-link is okay if you want to do that, though)
-    - every post must have a "sub", but it can be any string, including any string not previously used
-      - so if the sub already exists, connect this post to that sub
-      - but if the sub doesn't already exist, make a new sub!
-    - when finished redirects to the post just created
-  - `GET /posts/edit/:postid`
-    - form for editing an existing post
-    - please think for a moment about which parts of a post should be editable, and which should not
-    - Shouldn't load unless you're logged in _as the correct user_
-  - `POST /posts/edit/:postid`
-    - redirect back to the post when done
-  - `GET /posts/deleteconfirm/:postid`
-    - form for confirming delete of an existing post
-    - shouldn't load unless you're logged in _as the correct user_
-  - `POST /posts/delete/:postid`
-    - if cancelled, redirect back to the post
-    - if successful, redirect back to the _sub that the post belonged to_
-  - `POST /posts/comment-create/:postid`
-    - remember how `GET /posts/show/:postid` has a form for comments? It submits to here.
-- comments - these routes are _all optional_ at the PASS level, but I personally would find it useful to make them
-  - `GET /comments/show/:commentid`
-    - shows just a single comment with all its data and any links that are useful
-  - `GET /comments/deleteconfirm/:commentid`
-    - could be triggered from `GET /posts/show/:postid` or from `GET /comments/show/:commentid`
-  - `POST /comments/delete/:commentid`
+Generate Prisma Client and run migrations:
 
-#### Code organization
+```bash
+npx prisma generate
+npx prisma migrate dev
+```
 
-I expect you to use `express.Router` to organize your routes where appropriate (i.e. subs and posts, and if you do comments routes then those too).
+Optional - Seed the database with test data:
 
-I expect your variable names to be vaguely reasonable. An example of unreasonable is a variable with a name that is lies about what's in it (e.g. the variable is called `post` but it always contains an array of multiple posts, or a variable called `post_id` that contains a user ID). Also unreasonable is a variable that is super vague when there's an obvious less-vague name (e.g. a variable called `info` when there's an obvious better alternative like `post_count` or `user_name`).
+```bash
+npx prisma db seed
+```
 
-#### Ordering
+### 5. Build Tailwind CSS
 
-At this level, every time there is a listing of posts or comments, they should be sorted by timestamp, with the most recent post/comment at the top.
+```bash
+npm run tailwind:build
+```
 
-#### Header required
+## 🔑 Google OAuth 2.0 Setup
 
-Also, there should be a header shared across all pages.
-It should include the site title, of course, and that should be a link back to `GET /`.
-It should also include a link to `GET /subs/list`.
+To enable "Sign in with Google" functionality:
 
-If the user is logged out, the header should include a link to the login page (and, if you're doing signup stuff for higher grades, the signup page too).
+### Step 1: Create a Google Cloud Project
 
-If the user is logged in, the header should NOT include a login link, but it SHOULD include a link to create a new post.
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Click the project dropdown at the top
+3. Click **"New Project"**
+4. Enter a project name (e.g., "Reddit Clone")
+5. Click **Create**
 
-#### CSS requirements
+### Step 2: Enable Required APIs
 
-CSS requirements are _very very low_. We're not really doing CSS in this course. BUT, please try to not make it ugly. In particular, here are some suggestions.
+1. In the left sidebar, go to **APIs & Services** → **Library**
+2. Search for "Google+ API" or "Google Identity"
+3. Click on it and press **Enable**
 
-- it'd be nice if the header looks at least sort of like a header
-- it'd be nice if the lists look like lists
-- in pages that combine posts and comments, it should be easy to see that the post is more important than the comments (just font-size or something would be enough)
+### Step 3: Configure OAuth Consent Screen
 
-### SATISFACTORY
+1. Go to **APIs & Services** → **OAuth consent screen**
+2. Choose **External** (unless you have Google Workspace)
+3. Fill in the required fields:
+   - **App name**: Reddit Clone
+   - **User support email**: Your email
+   - **Developer contact information**: Your email
+4. Click **Save and Continue**
+5. Skip **Scopes** (click Save and Continue)
+6. Skip **Test users** (click Save and Continue)
+7. Click **Back to Dashboard**
 
-For this level, most of the work will be on getting voting working.
+### Step 4: Create OAuth Credentials
 
-#### Voting
+1. Go to **APIs & Services** → **Credentials**
+2. Click **"+ CREATE CREDENTIALS"** → **OAuth client ID**
+3. Application type: **Web application**
+4. Name: `Reddit Clone Web Client`
+5. Under **Authorized redirect URIs**, click **"+ ADD URI"** and enter:
+   ```
+   http://localhost:8000/auth/google/callback
+   ```
+6. Click **CREATE**
 
-Everywhere it's possible to see a post (homepage, subgroup listing, individual post page, etc), there should be an upvote button and a downvote button beside the post link. I suggest using two buttons, one that says "+" or "Up", and one that says "-" or "Down". This voting functionality should only show if the user is logged in.
+### Step 5: Save Your Credentials
 
-Each button could be its own form, or they could both be in one form. Whichever seems easier for you.
+A popup will appear with your credentials:
+- **Client ID**: Looks like `123456789-abc123.apps.googleusercontent.com`
+- **Client Secret**: Looks like `GOCSPX-abc123xyz456`
 
-Everywhere that it's possible to see a post, the net vote total should be visible (positive votes minus negative votes)
+**Copy both values** and paste them into your `.env` file:
 
-Unlike reddit, clicking on a vote link will do a full-page refresh. That's fine.
+```env
+GOOGLE_CLIENT_ID=123456789-abc123.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=GOCSPX-abc123xyz456
+GOOGLE_CALLBACK_URL=http://localhost:8000/auth/google/callback
+```
 
-This is one area where CSS is necessary. If I have voted on a post (up or down), the button should be obviously active. Make the whole thing filled in or something.
+### Step 6: Restart Your Server
 
-If I click the already-voted on button, that should cancel my vote. So I should be able to upvote something, then change my mind and switch that to downvote by clickong on downvote, and then change my mind again and cancel my vote by clicking on the upvote.
+After updating `.env`, restart the development server for changes to take effect.
 
-So you'll need to add at least this route:
+## 🏃 Running the Project
 
-- `POST /posts/vote/:postid/`
-  - uses a body field `setvoteto` to set vote to +1, -1, or 0, overriding previous vote
-  - redirects back to `GET /posts/show/:postid`
+### Development Mode (with auto-reload)
 
-#### User Signup
+```bash
+npm start
+```
 
-It should be possible to sign up as a new user.
+The server will start at `http://localhost:8000/`
 
-Two new routes are required: one for the form and one for the post. If you feel like combining the login page and the signup page, then you only have to do one extra route, but it's probably harder to get right.
+### Production Mode
 
-#### Code organization
+```bash
+npm run build
+npm run serve
+```
 
-I am expecting your code to be cleanly organized and readable. Use sensible variable
-names and format your code with prettier if need be.
+## 📁 Project Structure
 
-### EXEMPLARY
+```
+termprojstarter/
+├── controller/          # Business logic controllers
+│   ├── postController.ts
+│   └── userController.ts
+├── middleware/          # Express middleware
+│   ├── checkAuth.ts    # Authentication guards
+│   ├── passport.ts     # Local authentication strategy
+│   └── passport-google.ts  # Google OAuth strategy
+├── prisma/
+│   ├── schema.prisma   # Database schema
+│   ├── migrations/     # Database migrations
+│   └── dev.db         # SQLite database (development)
+├── public/
+│   └── css/
+│       ├── tailwind.css      # Compiled Tailwind CSS
+│       └── tailwind-input.css # Tailwind source
+├── routers/            # Express route handlers
+│   ├── authRoute.ts   # Authentication routes
+│   ├── indexRoute.ts  # Home route
+│   ├── postRouters.ts # Post CRUD routes
+│   └── subsRouters.ts # Subgroup routes
+├── types/
+│   └── express.d.ts   # TypeScript type definitions
+├── views/              # EJS templates
+│   ├── posts.ejs
+│   ├── individualPost.ejs
+│   ├── createPosts.ejs
+│   ├── deleteConfirmPost.ejs
+│   ├── login.ejs
+│   ├── subs.ejs
+│   └── sub.ejs
+├── app.ts             # Main application entry point
+├── db.ts              # Database query functions
+├── .env.example       # Environment variables template
+├── package.json
+├── prisma/schema.prisma
+└── tailwind.config.js
+```
 
-#### No Page Reload on Comment Updates
+## 📊 Database Schema
 
-When upvoting or downvoting a post, use AJAX
-to initiate the update in the background (preventing the page from reloading).
+### User
+- `id`: Unique identifier
+- `uname`: Username (unique)
+- `password`: Hashed password (optional for OAuth users)
+- `googleId`: Google user ID (for OAuth users)
+- `name`: Display name (from Google)
+- `email`: Email address
 
-#### Comment editing
+### Post
+- `id`: Unique identifier
+- `title`: Post title
+- `link`: External link (optional)
+- `description`: Post content
+- `subgroup`: Category/subgroup name
+- `timestamp`: Creation date
+- `creatorId`: Foreign key to User
 
-Comments should be editable, deletable, etc, just like everything else.
+### Comment
+- `id`: Unique identifier
+- `description`: Comment text
+- `postId`: Foreign key to Post
+- `creatorId`: Foreign key to User
+- `timestamp`: Creation date
 
-- So all of these comments routes
-  - `GET /comments/show/:commentid`
-  - `POST /comments/reply/:commentid`
-  - `GET /comments/edit/:commentid`
-  - `POST /comments/edit/:commentid`
-  - `GET /comments/deleteconfirm/:commentid`
-  - `POST /comments/delete/:commentid`
+### Vote
+- `userId`: Foreign key to User
+- `postId`: Foreign key to Post
+- `value`: Vote value (+1 for upvote, -1 for downvote)
+- Composite primary key: `[userId, postId]`
 
-All of these will go in their own `router`, of course, because consistency will help the next developer who works on this project.
+## 🔐 Authentication Routes
 
-Make sure that if a post is deleted, its comments are also deleted. (Cascading Delete).
+| Method | Route | Description |
+|--------|-------|-------------|
+| GET | `/auth/login` | Login page |
+| POST | `/auth/login` | Process local login |
+| GET | `/auth/google` | Initiate Google OAuth |
+| GET | `/auth/google/callback` | Google OAuth callback |
+| GET | `/auth/logout` | Log out current user |
 
-#### Ordering
+## 📮 Post Routes
 
-- Any view that shows a list of posts can now be viewed in at least two orders:
-  - by date (the thing you should already have working)
-  - by vote count (positive minus negative)
-  - optionally, by some combination, the way reddit does "hot"
-  - optionally, by total votes (positive _plus_ negative), like reddit's "controversial"
+| Method | Route | Description |
+|--------|-------|-------------|
+| GET | `/posts` | Homepage - list recent posts |
+| GET | `/posts/create` | Create post form |
+| POST | `/posts/create` | Process post creation |
+| GET | `/posts/show/:postid` | View individual post |
+| GET | `/posts/edit/:postid` | Edit post form |
+| POST | `/posts/edit/:postid` | Process post edit |
+| GET | `/posts/deleteconfirm/:postid` | Delete confirmation |
+| POST | `/posts/delete/:postid` | Process post deletion |
+| POST | `/posts/vote/:postid` | Vote on post |
+| POST | `/posts/comment-create/:postid` | Add comment to post |
 
-There should be some UI element on each page to switch between which ordering is active; I suggest buttons or links in a little row near the top.
+## 🏷️ Subgroup Routes
 
-Ideally this will be implemented by adding a query parameter ( https://expressjs.com/en/4x/api.html#req.query ) like `?orderby=date` or `?orderby=votes`.
+| Method | Route | Description |
+|--------|-------|-------------|
+| GET | `/subs/list` | List all subgroups |
+| GET | `/subs/show/:subname` | View posts in subgroup |
 
-Make sure that there's sensible default behaviour when the query parameter isn't specified.
+## 🎨 UI Features
+
+### Dark Mode
+- Click the moon/sun icon in the navigation bar to toggle
+- Preference is saved to browser localStorage
+- Respects system preference on first visit
+
+### Voting
+- 👍 Thumbs up for upvote
+- 👎 Thumbs down for downvote
+- Click again to remove your vote
+- Active votes highlighted with color
+
+## 🤝 Contributing
+
+This is a term project for COMP3012. Contributions are welcome for educational purposes.
+
+## 📝 License
+
+This project is created for educational purposes as part of COMP3012 coursework.
+
+## 👨‍💻 Author
+
+Created by Eric Kowal (yzg1199@gmail.com)
+
+## 🙏 Acknowledgments
+
+- Built with guidance from COMP3012 course materials
+- UI design inspired by Reddit
+- Icons and styling from Tailwind CSS
+- Authentication powered by Passport.js
+- Database management by Prisma
+
+---
+
+**Note**: This project is part of a term assignment demonstrating full-stack web development with Node.js, Express, and TypeScript.
