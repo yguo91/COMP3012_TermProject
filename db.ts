@@ -1,8 +1,15 @@
-// @ts-nocheck
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Post } from "@prisma/client";
 const prisma = new PrismaClient();
 
 // Keep the same API as fake-db.ts
+
+// Type for partial post updates
+interface PostUpdateData {
+  title?: string;
+  link?: string;
+  description?: string;
+  subgroup?: string;
+}
 
 export async function getUser(id: number) {
   return prisma.user.findUnique({ where: { id } });
@@ -16,7 +23,7 @@ export async function getVotesForPost(post_id: number) {
   return prisma.vote.findMany({ where: { postId: post_id } });
 }
 
-export async function decoratePost(post: any) {
+export async function decoratePost(post: Post) {
   const full = await prisma.post.findUnique({
     where: { id: post.id },
     include: {
@@ -73,8 +80,8 @@ async function nextPostId() {
   return (last?.id ?? 100) + 1;
 }
 
-export async function editPost(post_id: number, changes: any = {}) {
-  const data: any = {};
+export async function editPost(post_id: number, changes: PostUpdateData = {}) {
+  const data: PostUpdateData = {};
   if (changes.title) data.title = changes.title;
   if (changes.link) data.link = changes.link;
   if (changes.description) data.description = changes.description;

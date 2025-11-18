@@ -1,4 +1,3 @@
-// @ts-nocheck
 import express from "express";
 import * as database from "../controller/postController";
 import * as db from "../db";
@@ -7,7 +6,7 @@ import { ensureAuthenticated } from "../middleware/checkAuth";
 
 router.get("/", async (req, res) => {
   const posts = await database.getPosts(20);
-  const user = await req.user;
+  const user = req.user;
 
   // Get vote totals and user votes for each post
   const postsWithVotes = await Promise.all(
@@ -33,8 +32,8 @@ router.post("/create", ensureAuthenticated, async (req, res) => {
   // Get form data from request body
   const { title, link, description, subgroup } = req.body;
 
-  // Get the logged-in user's ID
-  const creatorId = req.user.id;
+  // Get the logged-in user's ID (guaranteed by ensureAuthenticated middleware)
+  const creatorId = req.user!.id;
 
   // Create the post in the database
   const newPost = await db.addPost(
@@ -79,7 +78,8 @@ router.get("/edit/:postid", ensureAuthenticated, async (req, res) => {
     return res.status(404).send("Post not found");
   }
 
-  const user = req.user;
+  // User is guaranteed by ensureAuthenticated middleware
+  const user = req.user!;
   if(post.creator.id !== user.id){
     return res.status(403).send("You are not authorized to edit this post");
   }
@@ -156,7 +156,8 @@ router.post("/comment-create/:postid", ensureAuthenticated, async (req, res) => 
 
     const { description } = req.body;
 
-    const creatorId = req.user.id;
+    // User is guaranteed by ensureAuthenticated middleware
+    const creatorId = req.user!.id;
 
     // Add the comment to the database
     await db.addComment(postId, creatorId, description);
@@ -178,8 +179,8 @@ router.post("/vote/:postid", ensureAuthenticated, async (req, res) => {
     return res.status(400).send("Invalid vote value. Must be 1, -1, or 0.");
   }
 
-  // Get the logged-in user's ID
-  const userId = req.user.id;
+  // Get the logged-in user's ID (guaranteed by ensureAuthenticated middleware)
+  const userId = req.user!.id;
 
   // Add/update the vote in the database
   await db.addVote(userId, postId, voteValue);
