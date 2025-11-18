@@ -37,6 +37,7 @@ export async function createGoogleUser(userData: {
       email: userData.email,
       name: userData.name,
       uname: userData.email, // Use email as username
+      password: null, // No password for OAuth users
     },
   });
 }
@@ -68,6 +69,9 @@ export async function getPosts(n = 5, sub?: string) {
     where: sub ? { subgroup: sub } : undefined,
     orderBy: { timestamp: "desc" },
     take: n,
+    include: {
+      creator: true, // Include creator data
+    },
   });
 }
 

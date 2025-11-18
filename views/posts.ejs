@@ -117,7 +117,7 @@
                 </a>
                 <div class="flex items-center text-sm text-gray-500 dark:text-gray-400 space-x-3">
                   <span class="flex items-center">
-                    👤 <strong class="ml-1 text-gray-700 dark:text-gray-300"><%= post.creator?.uname || 'Unknown' %></strong>
+                    👤 <strong class="ml-1 text-gray-700 dark:text-gray-300"><%= post.creator?.name || post.creator?.uname || 'Unknown' %></strong>
                   </span>
                   <span>•</span>
                   <a href="/subs/show/<%= post.subgroup %>" class="px-2 py-1 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-full hover:bg-blue-200 dark:hover:bg-blue-900 transition text-xs font-medium">
