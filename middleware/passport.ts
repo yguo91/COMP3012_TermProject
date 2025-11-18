@@ -5,14 +5,18 @@ import {
   getUserById,
 } from "../controller/userController";
 
-// ⭐ TODO: Passport Types
+// LocalStrategy verify callback type
 const localLogin = new LocalStrategy(
   {
     usernameField: "uname",
     passwordField: "password",
   },
-  async (uname: any, password: any, done: any) => {
-    // Check if user exists in databse
+  async (
+    uname: string,
+    password: string,
+    done: (error: any, user?: Express.User | false, options?: { message: string }) => void
+  ) => {
+    // Check if user exists in database
     const user = await getUserByEmailIdAndPassword(uname, password);
     // console.log('passport 13: '+ user.uname);
     return user
@@ -23,14 +27,20 @@ const localLogin = new LocalStrategy(
   }
 );
 
-// ⭐ TODO: Passport Types
-passport.serializeUser(function (user: any, done: any) {
+// Serialize user ID to session
+passport.serializeUser(function (
+  user: Express.User,
+  done: (err: any, id?: number) => void
+) {
   console.log("serialize: " + user.id);
   done(null, user.id);
 });
 
-// ⭐ TODO: Passport Types
-passport.deserializeUser(async function (id: any, done: any) {
+// Deserialize user from session using ID
+passport.deserializeUser(async function (
+  id: number,
+  done: (err: any, user?: Express.User | null) => void
+) {
   const user = await getUserById(id);
   if (user) {
     done(null, user);
