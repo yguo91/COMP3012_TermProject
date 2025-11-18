@@ -56,7 +56,7 @@ A full-featured Reddit-style social platform built with Express.js, TypeScript, 
 ### 1. Clone the Repository
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/yguo91/COMP3012_TermProject.git
 cd termprojstarter
 ```
 
@@ -315,7 +315,7 @@ This project is created for educational purposes as part of COMP3012 coursework.
 
 ## 👨‍💻 Author
 
-Created by Eric Kowal (yzg1199@gmail.com)
+Created by Eric Guo
 
 ## 🙏 Acknowledgments
 
