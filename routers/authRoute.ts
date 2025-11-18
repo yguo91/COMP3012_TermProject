@@ -14,6 +14,22 @@ router.post(
   })
 );
 
+// Google OAuth Routes
+router.get(
+  "/google",
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
+  })
+);
+
+router.get(
+  "/google/callback",
+  passport.authenticate("google", {
+    failureRedirect: "/auth/login",
+    successRedirect: "/posts",
+  })
+);
+
 router.get("/logout", (req, res, next) => {
   req.logout(function (err) {
     if (err) {

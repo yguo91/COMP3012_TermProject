@@ -1,6 +1,10 @@
+import dotenv from "dotenv";
+dotenv.config(); // Load .env file FIRST!
+
 import express from "express";
 import session from "express-session";
 import passport from "./middleware/passport";
+import "./middleware/passport-google"; // Initialize Google OAuth strategy
 const PORT = process.env.PORT || 8000;
 
 const app = express();

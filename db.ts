@@ -19,6 +19,34 @@ export async function getUserByUsername(uname: string) {
   return prisma.user.findUnique({ where: { uname } });
 }
 
+// Google OAuth functions
+export async function getUserByGoogleId(googleId: string) {
+  return prisma.user.findUnique({ where: { googleId } });
+}
+
+export async function createGoogleUser(userData: {
+  googleId: string;
+  email: string;
+  name: string;
+}) {
+  const nextId = await getNextUserId();
+  return prisma.user.create({
+    data: {
+      id: nextId,
+      googleId: userData.googleId,
+      email: userData.email,
+      name: userData.name,
+      uname: userData.email, // Use email as username
+      password: null, // No password for OAuth users
+    },
+  });
+}
+
+async function getNextUserId() {
+  const lastUser = await prisma.user.findFirst({ orderBy: { id: "desc" } });
+  return (lastUser?.id ?? 0) + 1;
+}
+
 export async function getVotesForPost(post_id: number) {
   return prisma.vote.findMany({ where: { postId: post_id } });
 }

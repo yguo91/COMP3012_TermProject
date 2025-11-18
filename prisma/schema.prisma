@@ -10,7 +10,12 @@ datasource db {
 model User {
   id       Int     @id
   uname    String  @unique
-  password String
+  password String? // Optional for OAuth users
+
+  // OAuth fields
+  googleId String? @unique // Google user ID
+  name     String? // Display name from Google
+  email    String? // Email from Google
 
   posts     Post[]
   comments  Comment[]

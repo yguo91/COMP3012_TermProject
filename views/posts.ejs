@@ -42,7 +42,7 @@
               <a href="/posts/create" class="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition font-medium">
                 + Create Post
               </a>
-              <span class="text-gray-700 dark:text-gray-200 font-medium">👤 <%= user.uname %></span>
+              <span class="text-gray-700 dark:text-gray-200 font-medium">👤 <%= user.name || user.uname %></span>
               <a href="/auth/logout" class="px-4 py-2 bg-red-500 dark:bg-red-600 text-white rounded-lg hover:bg-red-600 dark:hover:bg-red-700 transition">
                 Logout
               </a>
@@ -60,7 +60,7 @@
     <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Welcome Section -->
       <div class="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 dark:from-blue-700 dark:via-indigo-700 dark:to-purple-800 rounded-xl shadow-lg p-6 mb-8 ring ring-gray-900/5 dark:ring-gray-100/10">
-        <h2 class="text-3xl font-bold mb-2 text-gary">Welcome, <%= user?.uname || "Visitor" %>! </h2>
+        <h2 class="text-3xl font-bold mb-2 text-gary">Welcome, <%= user?.name || user?.uname || "Visitor" %>! </h2>
         <p class="text-blue-100 dark:text-blue-200">Explore the latest posts from our community</p>
       </div>
 

@@ -1,3 +1,6 @@
 node_modules/
 **/*solution*
 3012 Term Project.html
+.env
+.DS_Store
+.vscode/

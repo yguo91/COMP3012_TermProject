@@ -23,3 +23,22 @@ export const getUserById = async (id: number): Promise<User | null> => {
   }
   return null;
 };
+
+// Find or create user for OAuth (Google)
+export const findOrCreateUser = async (userData: {
+  googleId: string;
+  email: string;
+  name: string;
+}): Promise<User> => {
+  // First, try to find user by googleId
+  let user = await db.getUserByGoogleId(userData.googleId);
+
+  if (user) {
+    // User already exists, return it
+    return user;
+  }
+
+  // User doesn't exist, create new user
+  user = await db.createGoogleUser(userData);
+  return user;
+};

@@ -56,7 +56,7 @@
 
               <div class="flex items-center space-x-3 text-sm text-gray-500 dark:text-gray-400 mb-4">
                 <span class="flex items-center">
-                  👤 <strong class="ml-1 text-gray-700 dark:text-gray-300"><%= post.creator.uname %></strong>
+                  👤 <strong class="ml-1 text-gray-700 dark:text-gray-300"><%= post.creator.name || post.creator.uname %></strong>
                 </span>
                 <span>•</span>
                 <a href="/subs/show/<%= post.subgroup %>" class="px-2 py-1 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-full hover:bg-blue-200 dark:hover:bg-blue-900 transition font-medium">
@@ -133,7 +133,7 @@
               <div class="border-l-4 border-blue-400 dark:border-blue-500 bg-gray-50 dark:bg-gray-700/50 rounded-r-lg p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
                 <p class="text-gray-800 dark:text-gray-200 mb-2"><%= comment.description %></p>
                 <div class="flex items-center text-sm text-gray-500 dark:text-gray-400 space-x-2">
-                  <span class="font-semibold text-gray-700 dark:text-gray-300">👤 <%= comment.creator.uname %></span>
+                  <span class="font-semibold text-gray-700 dark:text-gray-300">👤 <%= comment.creator.name || comment.creator.uname %></span>
                   <span>•</span>
                   <span>📅 <%= comment.timestamp.toLocaleDateString() %></span>
                 </div>
