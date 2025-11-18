@@ -57,7 +57,7 @@ A full-featured Reddit-style social platform built with Express.js, TypeScript, 
 
 ```bash
 git clone https://github.com/yguo91/COMP3012_TermProject.git
-cd termprojstarter
+cd COMP3012_TermProject
 ```
 
 ### 2. Install Dependencies
