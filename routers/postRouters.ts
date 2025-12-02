@@ -1,8 +1,12 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import * as database from "../controller/postController";
 import * as db from "../db";
 const router = express.Router();
 import { ensureAuthenticated } from "../middleware/checkAuth";
+import { createPostValidation, editPostValidation, postIdValidation } from "../middleware/validators/postValidators";
+import { createCommentValidation } from "../middleware/validators/commentValidators";
+import { voteValidation } from "../middleware/validators/voteValidators";
+import { handleValidationErrors } from "../middleware/validators/handleValidationErrors";
 
 router.get("/", async (req, res) => {
   const posts = await database.getPosts(20);
@@ -28,25 +32,31 @@ router.get("/create", ensureAuthenticated, (req, res) => {
   res.render("createPosts", { mode: "create" });
 });
 
-router.post("/create", ensureAuthenticated, async (req, res) => {
-  // Get form data from request body
-  const { title, link, description, subgroup } = req.body;
+router.post(
+  "/create",
+  ensureAuthenticated,
+  createPostValidation,
+  handleValidationErrors,
+  async (req: Request, res: Response) => {
+    // Get form data from request body
+    const { title, link, description, subgroup } = req.body;
 
-  // Get the logged-in user's ID (guaranteed by ensureAuthenticated middleware)
-  const creatorId = req.user!.id;
+    // Get the logged-in user's ID (guaranteed by ensureAuthenticated middleware)
+    const creatorId = req.user!.id;
 
-  // Create the post in the database
-  const newPost = await db.addPost(
-    title,
-    link || "", // link is optional, default to empty string
-    creatorId,
-    description,
-    subgroup || "general" // if no subgroup provided, use "general"
-  );
+    // Create the post in the database
+    const newPost = await db.addPost(
+      title,
+      link || "", // link is optional, default to empty string
+      creatorId,
+      description,
+      subgroup || "general" // if no subgroup provided, use "general"
+    );
 
-  // Redirect to the newly created post
-  res.redirect(`/posts/show/${newPost.id}`);
-});
+    // Redirect to the newly created post
+    res.redirect(`/posts/show/${newPost.id}`);
+  }
+);
 
 router.get("/show/:postid", async (req, res) => {
   // Get the post ID from the URL parameter
@@ -86,33 +96,39 @@ router.get("/edit/:postid", ensureAuthenticated, async (req, res) => {
   res.render("createPosts", { post, user, mode: "edit" });
 });
 
-router.post("/edit/:postid", ensureAuthenticated, async (req, res) => {
-  const postId = parseInt(req.params.postid);
-  const { title, link, description, subgroup } = req.body;
+router.post(
+  "/edit/:postid",
+  ensureAuthenticated,
+  editPostValidation,
+  handleValidationErrors,
+  async (req: Request, res: Response) => {
+    const postId = parseInt(req.params.postid);
+    const { title, link, description, subgroup } = req.body;
 
-  // Fetch the post to check ownership
-  const post = await db.getPost(postId);
-  if (!post) {
-    return res.status(404).send("Post not found");
+    // Fetch the post to check ownership
+    const post = await db.getPost(postId);
+    if (!post) {
+      return res.status(404).send("Post not found");
+    }
+
+    const user = req.user;
+    if (!user || user.id !== post.creatorId) {
+      return res.status(403).send("You are not allowed to edit this post.");
+    }
+
+    // Update the post (adjust to match your db helper)
+    await db.updatePost(
+      postId,
+      title,
+      link || "",
+      description,
+      subgroup || "general"
+    );
+
+    // Redirect back to the post page
+    res.redirect(`/posts/show/${postId}`);
   }
-
-  const user = req.user;
-  if (!user || user.id !== post.creatorId) {
-    return res.status(403).send("You are not allowed to edit this post.");
-  }
-
-  // Update the post (adjust to match your db helper)
-  await db.updatePost(
-    postId,
-    title,
-    link || "",
-    description,
-    subgroup || "general"
-  );
-
-  // Redirect back to the post page
-  res.redirect(`/posts/show/${postId}`);
-});
+);
 
 router.get("/deleteconfirm/:postid", ensureAuthenticated, async (req, res) => {
   const postId = parseInt(req.params.postid);
@@ -130,28 +146,39 @@ router.get("/deleteconfirm/:postid", ensureAuthenticated, async (req, res) => {
   res.render("deleteConfirmPost", { post, user });
 });
 
-router.post("/delete/:postid", ensureAuthenticated, async (req, res) => {
-  const postId = parseInt(req.params.postid);
+router.post(
+  "/delete/:postid",
+  ensureAuthenticated,
+  postIdValidation,
+  handleValidationErrors,
+  async (req: Request, res: Response) => {
+    const postId = parseInt(req.params.postid);
 
-  // Make sure the post exists & user owns it
-  const post = await db.getPost(postId);
-  if (!post) {
-    return res.status(404).send("Post not found");
+    // Make sure the post exists & user owns it
+    const post = await db.getPost(postId);
+    if (!post) {
+      return res.status(404).send("Post not found");
+    }
+
+    const user = req.user;
+    if (!user || user.id !== post.creatorId) {
+      return res.status(403).send("You are not allowed to delete this post.");
+    }
+
+    // Delete from DB
+    await db.deletePost(postId);
+
+    // Redirect to homepage after deletion
+    res.redirect("/posts");
   }
+);
 
-  const user = req.user;
-  if (!user || user.id !== post.creatorId) {
-    return res.status(403).send("You are not allowed to delete this post.");
-  }
-
-  // Delete from DB
-  await db.deletePost(postId);
-
-  // Redirect to homepage after deletion
-  res.redirect("/posts");
-});
-
-router.post("/comment-create/:postid", ensureAuthenticated, async (req, res) => {
+router.post(
+  "/comment-create/:postid",
+  ensureAuthenticated,
+  createCommentValidation,
+  handleValidationErrors,
+  async (req: Request, res: Response) => {
     const postId = parseInt(req.params.postid);
 
     const { description } = req.body;
@@ -167,27 +194,28 @@ router.post("/comment-create/:postid", ensureAuthenticated, async (req, res) => 
   }
 );
 
-router.post("/vote/:postid", ensureAuthenticated, async (req, res) => {
-  const postId = parseInt(req.params.postid);
-  const { setvoteto } = req.body;
+router.post(
+  "/vote/:postid",
+  ensureAuthenticated,
+  voteValidation,
+  handleValidationErrors,
+  async (req: Request, res: Response) => {
+    const postId = parseInt(req.params.postid);
+    const { setvoteto } = req.body;
 
-  // Convert vote value to number (should be 1, -1, or 0)
-  const voteValue = parseInt(setvoteto);
+    // Convert vote value to number (already validated and converted by middleware)
+    const voteValue = parseInt(setvoteto);
 
-  // Validate vote value
-  if (![1, -1, 0].includes(voteValue)) {
-    return res.status(400).send("Invalid vote value. Must be 1, -1, or 0.");
+    // Get the logged-in user's ID (guaranteed by ensureAuthenticated middleware)
+    const userId = req.user!.id;
+
+    // Add/update the vote in the database
+    await db.addVote(userId, postId, voteValue);
+
+    // Redirect back to where the user came from, or to the post page
+    const referer = req.get("Referer") || `/posts/show/${postId}`;
+    res.redirect(referer);
   }
-
-  // Get the logged-in user's ID (guaranteed by ensureAuthenticated middleware)
-  const userId = req.user!.id;
-
-  // Add/update the vote in the database
-  await db.addVote(userId, postId, voteValue);
-
-  // Redirect back to where the user came from, or to the post page
-  const referer = req.get("Referer") || `/posts/show/${postId}`;
-  res.redirect(referer);
-});
+);
 
 export default router;
