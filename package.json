@@ -7,10 +7,13 @@
     "seed": "ts-node prisma/seed.ts"
   },
   "scripts": {
+    "dev": "tsx watch app.ts",
+    "build": "tsc",
+    "start": "node dist/app.js",
+    "postinstall": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "db:seed": "prisma db seed",
-    "start": "tsx watch app.ts",
     "tailwind:build": "tailwindcss -i ./public/css/tailwind-input.css -o ./public/css/tailwind.css --minify"
   },
   "license": "MIT",

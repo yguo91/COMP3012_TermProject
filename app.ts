@@ -21,12 +21,12 @@ app.set("view engine", "ejs");
 app.use(express.static("public"));
 app.use(
   session({
-    secret: "secret",
+    secret: process.env.SESSION_SECRET || "secret",
     resave: true,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: false, // HTTPS Required
+      secure: process.env.NODE_ENV === "production", // Use HTTPS in production
       maxAge: 24 * 60 * 60 * 1000,
     },
   })
